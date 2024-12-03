@@ -50,22 +50,26 @@ public class TextCompressor {
             }
         }
 
+        // Add last word
+        if (!currentWord.isEmpty()) {
+            wordsSet.add(currentWord);
+            words.add(currentWord);
+        }
+
         // Write number of words
-        BinaryStdOut.write(words.size());
+        BinaryStdOut.write(wordsSet.size());
 
         // Write word set with separator
         for (String word : wordsSet) {
             BinaryStdOut.write(word);
-            BinaryStdOut.write(0, 8);
+            BinaryStdOut.write((char) 0);
         }
 
         // Write words
         ArrayList<String> wordSetList = new ArrayList<>(wordsSet);
-        for (int i = 0; i < words.size(); i++) {
-            BinaryStdOut.write(wordSetList.indexOf(words.get(i)));
-            if (i < words.size() - 1) {
-                BinaryStdOut.write(' ');
-            }
+        for (String word : words) {
+            int index = wordSetList.indexOf(word);
+            BinaryStdOut.write(index);
         }
 
         BinaryStdOut.close();
@@ -83,7 +87,7 @@ public class TextCompressor {
         while (currentWordCount < numWords) {
             char nextChar = BinaryStdIn.readChar();
 
-            if (nextChar == 0) {
+            if (nextChar == (char) 0) {
                 wordsSet.add(currentWord);
                 currentWord = "";
                 currentWordCount++;
@@ -96,6 +100,11 @@ public class TextCompressor {
         while (!BinaryStdIn.isEmpty()) {
             int index = BinaryStdIn.readInt();
             BinaryStdOut.write(wordsSet.get(index));
+
+            // Add space if there is a next word
+            if (!BinaryStdIn.isEmpty()) {
+                BinaryStdOut.write(" ");
+            }
         }
 
         BinaryStdOut.close();
