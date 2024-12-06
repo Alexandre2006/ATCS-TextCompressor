@@ -29,84 +29,15 @@ import java.util.List;
  *  The {@code TextCompressor} class provides static methods for compressing
  *  and expanding natural language through textfile input.
  *
- *  @author Zach Blick, YOUR NAME HERE
+ *  @author Zach Blick, Alexandre Haddad-Delaveau
  */
 public class TextCompressor {
 
     private static void compress() {
-
-        LinkedHashSet<String> wordsSet = new LinkedHashSet<>();
-        ArrayList<String> words = new ArrayList<>();
-        String currentWord = "";
-
-        while (!BinaryStdIn.isEmpty()) {
-            char currentChar = BinaryStdIn.readChar();
-            if (currentChar == ' ') {
-                wordsSet.add(currentWord);
-                words.add(currentWord);
-                currentWord = "";
-            } else {
-                currentWord += currentChar;
-            }
-        }
-
-        // Add last word
-        if (!currentWord.isEmpty()) {
-            wordsSet.add(currentWord);
-            words.add(currentWord);
-        }
-
-        // Write number of words
-        BinaryStdOut.write(wordsSet.size());
-
-        // Write word set with separator
-        for (String word : wordsSet) {
-            BinaryStdOut.write(word);
-            BinaryStdOut.write((char) 0);
-        }
-
-        // Write words
-        ArrayList<String> wordSetList = new ArrayList<>(wordsSet);
-        for (String word : words) {
-            int index = wordSetList.indexOf(word);
-            BinaryStdOut.write(index);
-        }
-
         BinaryStdOut.close();
     }
 
     private static void expand() {
-
-        // Read # of words
-        ArrayList<String> wordsSet = new ArrayList<>();
-        int numWords = BinaryStdIn.readInt();
-
-        // Read word set in
-        String currentWord = "";
-        int currentWordCount = 0;
-        while (currentWordCount < numWords) {
-            char nextChar = BinaryStdIn.readChar();
-
-            if (nextChar == (char) 0) {
-                wordsSet.add(currentWord);
-                currentWord = "";
-                currentWordCount++;
-            } else {
-                currentWord += nextChar;
-            }
-        }
-
-        // Read words
-        while (!BinaryStdIn.isEmpty()) {
-            int index = BinaryStdIn.readInt();
-            BinaryStdOut.write(wordsSet.get(index));
-
-            // Add space if there is a next word
-            if (!BinaryStdIn.isEmpty()) {
-                BinaryStdOut.write(" ");
-            }
-        }
-
         BinaryStdOut.close();
     }
 
