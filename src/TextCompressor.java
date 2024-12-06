@@ -21,9 +21,6 @@
  *  = 43.54% compression ratio!
  ******************************************************************************/
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -35,17 +32,19 @@ import java.util.NoSuchElementException;
 public class TextCompressor {
 
     static int EOF = 0x80;
+    static int BITS = 8; // # of bits per code / char (8 MINIMUM)
+    static int MAX_CODE = (int) (Math.pow(2, BITS));
 
     private static void writeCode(String value, TST codes, boolean lastCode) {
         if (value.length() == 1) {
-            BinaryStdOut.write(value, 32);
+            BinaryStdOut.write(value, BITS);
         } else {
-            BinaryStdOut.write(codes.lookup(value));
+            BinaryStdOut.write(codes.lookup(value), BITS);
         }
 
         // Write EOF value if this is the last code
         if (lastCode) {
-            BinaryStdOut.write(EOF);
+            BinaryStdOut.write(EOF, BITS);
         }
     }
 
@@ -72,9 +71,11 @@ public class TextCompressor {
             // Substring the written value (no lookahead character)
             String writtenValue = chars.substring(0, chars.length() - 1);
 
-            // Create new code with characters read
-            codes.insert(chars, currentCode);
-            currentCode++;
+            // Create new code with characters read, as long as we haven't reached the max code
+            if (currentCode < MAX_CODE) {
+                codes.insert(chars, currentCode);
+                currentCode++;
+            }
 
             // Write value to output
             writeCode(writtenValue, codes, BinaryStdIn.isEmpty());
