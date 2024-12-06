@@ -32,7 +32,7 @@ import java.util.NoSuchElementException;
 public class TextCompressor {
 
     static int EOF = 0x80;
-    static int BITS = 8; // # of bits per code / char (8 MINIMUM)
+    static int BITS = 14; // # of bits per code / char (8 MINIMUM)
     static int MAX_CODE = (int) (Math.pow(2, BITS));
 
     private static void writeCode(String value, TST codes, boolean lastCode) {
@@ -45,6 +45,7 @@ public class TextCompressor {
         // Write EOF value if this is the last code
         if (lastCode) {
             BinaryStdOut.write(EOF, BITS);
+            BinaryStdOut.close();
         }
     }
 
@@ -58,7 +59,7 @@ public class TextCompressor {
         while (!BinaryStdIn.isEmpty()) {
 
             // Read chars until no existing match is found in codes
-            while (codes.lookup(chars) != TST.EMPTY) {
+            while (codes.lookup(chars) != TST.EMPTY || chars.length() == 1) {
                 try {
                     chars += BinaryStdIn.readChar();
                 } catch (NoSuchElementException exception) {
@@ -83,11 +84,47 @@ public class TextCompressor {
             // Reset chars string
             chars = chars.substring(chars.length() - 1);
         }
-
-        BinaryStdOut.close();
     }
 
     private static void expand() {
+        // Store codes in a Map
+        String[] codes = new String[MAX_CODE];
+        int currentCode = 0x81;
+
+        // Read codes
+        int code = BinaryStdIn.readInt(BITS);
+        while (!BinaryStdIn.isEmpty()) {
+            // Exit early if EOF is reached
+            if (code == EOF) {
+                break;
+            }
+
+            // Get string value associated with code
+            String codeValue = codes[code] != null ? codes[code] : String.valueOf((char) code);
+
+            // Read lookahead code
+            int lookaheadCode = BinaryStdIn.readInt(BITS);
+
+            // Write new code
+            if (currentCode < MAX_CODE) {
+                if (lookaheadCode == currentCode) {
+                    // Edge case
+                    String newCodeValue = codeValue + codeValue.charAt(0);
+                    codes[currentCode] = newCodeValue;
+                } else {
+                    String lookaheadCodeValue = codes[lookaheadCode] != null ? codes[lookaheadCode] : String.valueOf((char) lookaheadCode);
+                    String newCodeValue = codeValue + lookaheadCodeValue;
+                    codes[currentCode] = newCodeValue;
+                }
+            }
+
+            // Write value
+            BinaryStdOut.write(codeValue);
+
+            // Update current code
+            code = lookaheadCode;
+        }
+
         BinaryStdOut.close();
     }
 
