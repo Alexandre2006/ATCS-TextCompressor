@@ -36,6 +36,19 @@ public class TextCompressor {
 
     static int EOF = 0x80;
 
+    private static void writeCode(String value, TST codes, boolean lastCode) {
+        if (value.length() == 1) {
+            BinaryStdOut.write(value, 32);
+        } else {
+            BinaryStdOut.write(codes.lookup(value));
+        }
+
+        // Write EOF value if this is the last code
+        if (lastCode) {
+            BinaryStdOut.write(EOF);
+        }
+    }
+
     private static void compress() {
         // Store codes in TST
         TST codes = new TST();
@@ -51,12 +64,7 @@ public class TextCompressor {
                     chars += BinaryStdIn.readChar();
                 } catch (NoSuchElementException exception) {
                     // If we've reached the end of the file, write the value & exit
-                    if (chars.length() == 1) {
-                        BinaryStdOut.write(chars, 32);
-                    } else {
-                        BinaryStdOut.write(codes.lookup(chars));
-                    }
-
+                    writeCode(chars, codes, true);
                     System.exit(0);
                 }
             }
@@ -69,11 +77,7 @@ public class TextCompressor {
             currentCode++;
 
             // Write value to output
-            if (writtenValue.length() == 1) {
-                BinaryStdOut.write(writtenValue, 32);
-            } else {
-                BinaryStdOut.write(codes.lookup(chars));
-            }
+            writeCode(writtenValue, codes, BinaryStdIn.isEmpty());
 
             // Reset chars string
             chars = chars.substring(chars.length() - 1);
