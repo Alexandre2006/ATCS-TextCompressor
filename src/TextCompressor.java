@@ -24,6 +24,7 @@
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  *  The {@code TextCompressor} class provides static methods for compressing
@@ -33,7 +34,51 @@ import java.util.List;
  */
 public class TextCompressor {
 
+    static int EOF = 0x80;
+
     private static void compress() {
+        // Store codes in TST
+        TST codes = new TST();
+        int currentCode = 0x81;
+
+        // Read input file
+        String chars = String.valueOf(BinaryStdIn.readChar());
+        while (!BinaryStdIn.isEmpty()) {
+
+            // Read chars until no existing match is found in codes
+            while (codes.lookup(chars) != TST.EMPTY) {
+                try {
+                    chars += BinaryStdIn.readChar();
+                } catch (NoSuchElementException exception) {
+                    // If we've reached the end of the file, write the value & exit
+                    if (chars.length() == 1) {
+                        BinaryStdOut.write(chars, 32);
+                    } else {
+                        BinaryStdOut.write(codes.lookup(chars));
+                    }
+
+                    System.exit(0);
+                }
+            }
+
+            // Substring the written value (no lookahead character)
+            String writtenValue = chars.substring(0, chars.length() - 1);
+
+            // Create new code with characters read
+            codes.insert(chars, currentCode);
+            currentCode++;
+
+            // Write value to output
+            if (writtenValue.length() == 1) {
+                BinaryStdOut.write(writtenValue, 32);
+            } else {
+                BinaryStdOut.write(codes.lookup(chars));
+            }
+
+            // Reset chars string
+            chars = chars.substring(chars.length() - 1);
+        }
+
         BinaryStdOut.close();
     }
 
