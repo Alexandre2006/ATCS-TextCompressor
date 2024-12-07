@@ -21,6 +21,7 @@
  *  = 43.54% compression ratio!
  ******************************************************************************/
 
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 /**
@@ -31,8 +32,8 @@ import java.util.NoSuchElementException;
  */
 public class TextCompressor {
 
-    static int EOF = 0x80;
-    static int BITS = 14; // # of bits per code / char (8 MINIMUM)
+    static int EOF = 0x100;
+    static int BITS = 14; // # of bits per code / char (9 MINIMUM)
     static int MAX_CODE = (int) (Math.pow(2, BITS));
 
     private static void writeCode(String value, TST codes, boolean lastCode) {
@@ -52,7 +53,7 @@ public class TextCompressor {
     private static void compress() {
         // Store codes in TST
         TST codes = new TST();
-        int currentCode = 0x81;
+        int currentCode = 0x101;
 
         // Read input file
         String chars = String.valueOf(BinaryStdIn.readChar());
@@ -61,7 +62,7 @@ public class TextCompressor {
             // Read chars until no existing match is found in codes
             while (codes.lookup(chars) != TST.EMPTY || chars.length() == 1) {
                 try {
-                    chars += BinaryStdIn.readChar();
+                    chars += BinaryStdIn.readChar(8);
                 } catch (NoSuchElementException exception) {
                     // If we've reached the end of the file, write the value & exit
                     writeCode(chars, codes, true);
@@ -89,7 +90,7 @@ public class TextCompressor {
     private static void expand() {
         // Store codes in a Map
         String[] codes = new String[MAX_CODE];
-        int currentCode = 0x81;
+        int currentCode = 0x101;
 
         // Read codes
         int code = BinaryStdIn.readInt(BITS);
@@ -100,7 +101,7 @@ public class TextCompressor {
             }
 
             // Get string value associated with code
-            String codeValue = codes[code] != null ? codes[code] : String.valueOf((char) code);
+            String codeValue = code < 0x101 ? String.valueOf((char) code) : codes[code];
 
             // Read lookahead code
             int lookaheadCode = BinaryStdIn.readInt(BITS);
@@ -113,9 +114,10 @@ public class TextCompressor {
                     codes[currentCode] = newCodeValue;
                 } else {
                     String lookaheadCodeValue = codes[lookaheadCode] != null ? codes[lookaheadCode] : String.valueOf((char) lookaheadCode);
-                    String newCodeValue = codeValue + lookaheadCodeValue;
+                    String newCodeValue = codeValue + lookaheadCodeValue.charAt(0);
                     codes[currentCode] = newCodeValue;
                 }
+                currentCode++;
             }
 
             // Write value
