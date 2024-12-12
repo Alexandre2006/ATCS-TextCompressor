@@ -1,9 +1,17 @@
-Name: YOUR NAME HERE
+Name: Alexandre Haddad-Delaveau
+NOTE: Dates may be slightly off due to me not "git add" the work log... I was testing in src/ and ran git add . assuming it would add everything. I was stupid.
 
-| Date    |  Time  |                                     Update |
-|:--------|:------:|-------------------------------------------:|
-| April 5 | 9-10pm | I tried to write abstract, efficient code. |
-|         |        |                                            |
+| Date   |    Time     |                                                                                                                                                                                                                                                                                                                          Update |
+|:-------|:-----------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| Dec 3  | 09:00-09:30 | Designed a super simple compression algorithm that gets all of the unique words in the text and appends them all in the metadata. It then refers to the index of the words in the metadata rather than writing each individual character of the word, hopefully saving some space. Compressor is finished, decompressor is WIP. |
+| Dec 3  | 09:30-10:00 |                                                                                                                                                                                                                                                               Fixed some bugs in the compressor and completed the decompressor. |
+| Dec 6  | 14:00-14:30 |                                                                                                                                      Deleted all of my previous code and completed the compression portion of the LZW algorithm, as described in the text we read. Always used 32 bit codes... so pretty inefficient right now. |
+| Dec 6  | 14:30-14:35 |                                                                                                                                                                                                                                       Cleaned up some of the code. Moved repeated code for writing a character into a function. |
+| Dec 6  | 14:35-14:40 |                                                                                                                                                                                                                     Added constants for configuring the limit on the number of codes and the number of bits used for each code. |
+| Dec 6  | 14:40-15:00 |                                                                                                                                                                                                                                                                          Completed the expansion function of the LZW algorithm. |
+| Dec 6  | 16:00-16:10 |                                                      Fixed a bug which would cause the compression algorithm to break when French was spoken. French accents are part of extended ASCII and I just assumed we weren't using extended ASCII... So I adjusted the code to be compatible with extended ASCII. Everything works now |
+| Dec 10 | 13:00-13:30 |                                                Attempted to make the LZW algorithm more effective by using a variable amount of bits for the codes. So initially, the codes are only 9 bits, but as the need for more codes increases, it increase. It doesn't work very well yet, and I'm having issues with the decompressor. |
+| Dec 10 | 13:30-14:00 |                                                                          Completed the decompressor. Switched away from using a code to mark the bit increase to just increasing whenever we run out of codes in both the compressor and the decompressor. Works really well now, and is actually substantially more efficient. |
 
 
 To add a new row to the table, click into a cell and then hit shift-enter.

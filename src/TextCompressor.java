@@ -22,6 +22,7 @@
  ******************************************************************************/
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -33,27 +34,34 @@ import java.util.NoSuchElementException;
 public class TextCompressor {
 
     static int EOF = 0x100;
-    static int BITS = 14; // # of bits per code / char (9 MINIMUM)
-    static int MAX_CODE = (int) (Math.pow(2, BITS));
+    static int START = EOF + 1;
+
+    static int CURRENT_BITS = 9; // # of bits per code / char (9 MINIMUM)
+    static int MAX_CODE = (int) (Math.pow(2, CURRENT_BITS)) - 1;
 
     private static void writeCode(String value, TST codes, boolean lastCode) {
         if (value.length() == 1) {
-            BinaryStdOut.write(value, BITS);
+            BinaryStdOut.write((int) value.charAt(0), CURRENT_BITS);
         } else {
-            BinaryStdOut.write(codes.lookup(value), BITS);
+            BinaryStdOut.write(codes.lookup(value), CURRENT_BITS);
         }
 
         // Write EOF value if this is the last code
         if (lastCode) {
-            BinaryStdOut.write(EOF, BITS);
+            BinaryStdOut.write(EOF, CURRENT_BITS);
             BinaryStdOut.close();
         }
+    }
+
+    private static void increaseSize() {
+        CURRENT_BITS++;
+        MAX_CODE = (int) (Math.pow(2, CURRENT_BITS));
     }
 
     private static void compress() {
         // Store codes in TST
         TST codes = new TST();
-        int currentCode = 0x101;
+        int currentCode = START;
 
         // Read input file
         String chars = String.valueOf(BinaryStdIn.readChar());
@@ -74,10 +82,12 @@ public class TextCompressor {
             String writtenValue = chars.substring(0, chars.length() - 1);
 
             // Create new code with characters read, as long as we haven't reached the max code
-            if (currentCode < MAX_CODE) {
-                codes.insert(chars, currentCode);
-                currentCode++;
+            if (currentCode >= MAX_CODE) {
+                increaseSize();
             }
+
+            codes.insert(chars, currentCode);
+            currentCode++;
 
             // Write value to output
             writeCode(writtenValue, codes, BinaryStdIn.isEmpty());
@@ -89,11 +99,11 @@ public class TextCompressor {
 
     private static void expand() {
         // Store codes in a Map
-        String[] codes = new String[MAX_CODE];
-        int currentCode = 0x101;
+        String[] codes = new String[Integer.MAX_VALUE/2];
+        int currentCode = START;
 
         // Read codes
-        int code = BinaryStdIn.readInt(BITS);
+        int code = BinaryStdIn.readInt(CURRENT_BITS);
         while (!BinaryStdIn.isEmpty()) {
             // Exit early if EOF is reached
             if (code == EOF) {
@@ -101,10 +111,15 @@ public class TextCompressor {
             }
 
             // Get string value associated with code
-            String codeValue = code < 0x101 ? String.valueOf((char) code) : codes[code];
+            String codeValue = code < START ? String.valueOf((char) code) : codes[code];
+
+            // Increase bit count if necessary
+            if (currentCode == MAX_CODE - 1) {
+                increaseSize();
+            }
 
             // Read lookahead code
-            int lookaheadCode = BinaryStdIn.readInt(BITS);
+            int lookaheadCode = BinaryStdIn.readInt(CURRENT_BITS);
 
             // Write new code
             if (currentCode < MAX_CODE) {
